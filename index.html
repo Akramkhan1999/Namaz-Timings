@@ -9,6 +9,9 @@
     <meta name="theme-color" content="#000000" id="theme-meta">
     
     <title>Namaz Timings - Elite Tracker</title>
+    
+    <link rel="manifest" href="manifest.json">
+    
     <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Lexend:wght@800;900&family=Noto+Naskh+Arabic:wght@700&family=Press+Start+2P&family=Teko:wght@600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
@@ -359,7 +362,7 @@
 // FIREBASE CONFIGURATION
 // ==========================================
 const firebaseConfig = {
-  apiKey: "AIzaSyCPUC-VaYCdrcLrDNfcSl1-XDrBGVDnVRg",
+  apiKey: "AIzaSyCPUC-VaYCdrdLrDNFcSl1-XDrBGVDnVRg",
   authDomain: "namaz-tracker-6d0df.firebaseapp.com",
   projectId: "namaz-tracker-6d0df",
   storageBucket: "namaz-tracker-6d0df.firebasestorage.app",
@@ -523,9 +526,12 @@ function getYearlyTimings(dateObj) {
 
 const ramzanData = {"2026-02-19":{saher:"05:19",iftar:"18:25",hijri:1},"2026-02-20":{saher:"05:18",iftar:"18:25",hijri:2},"2026-02-21":{saher:"05:18",iftar:"18:26",hijri:3},"2026-02-22":{saher:"05:18",iftar:"18:26",hijri:4},"2026-02-23":{saher:"05:17",iftar:"18:27",hijri:5},"2026-02-24":{saher:"05:17",iftar:"18:27",hijri:6},"2026-02-25":{saher:"05:15",iftar:"18:27",hijri:7},"2026-02-26":{saher:"05:15",iftar:"18:27",hijri:8},"2026-02-27":{saher:"05:14",iftar:"18:28",hijri:9},"2026-02-28":{saher:"05:14",iftar:"18:28",hijri:10},"2026-03-01":{saher:"05:13",iftar:"18:28",hijri:11},"2026-03-02":{saher:"05:11",iftar:"18:28",hijri:12},"2026-03-03":{saher:"05:11",iftar:"18:28",hijri:13},"2026-03-04":{saher:"05:10",iftar:"18:29",hijri:14},"2026-03-05":{saher:"05:10",iftar:"18:30",hijri:15},"2026-03-06":{saher:"05:09",iftar:"18:30",hijri:16},"2026-03-07":{saher:"05:08",iftar:"18:30",hijri:17},"2026-03-08":{saher:"05:08",iftar:"18:30",hijri:18},"2026-03-09":{saher:"05:07",iftar:"18:30",hijri:19},"2026-03-10":{saher:"05:06",iftar:"18:30",hijri:20},"2026-03-11":{saher:"05:05",iftar:"18:30",hijri:21},"2026-03-12":{saher:"05:05",iftar:"18:31",hijri:22},"2026-03-13":{saher:"05:04",iftar:"18:31",hijri:23},"2026-03-14":{saher:"05:03",iftar:"18:31",hijri:24},"2026-03-15":{saher:"05:02",iftar:"18:31",hijri:25},"2026-03-16":{saher:"05:02",iftar:"18:32",hijri:26},"2026-03-17":{saher:"05:01",iftar:"18:32",hijri:27},"2026-03-18":{saher:"05:00",iftar:"18:32",hijri:28},"2026-03-19":{saher:"05:00",iftar:"18:32",hijri:29}};
 
+function getDbKey(dateObj) { 
+    return dateObj.getFullYear() + '-' + String(dateObj.getMonth() + 1).padStart(2, '0') + '-' + String(dateObj.getDate()).padStart(2, '0'); 
+}
+
 function getTimingsForDate(dateObj) {
-    // Guarantees it uses local timezone format, preventing 5:30 AM offsets
-    const dStr = dateObj.getFullYear() + '-' + String(dateObj.getMonth() + 1).padStart(2, '0') + '-' + String(dateObj.getDate()).padStart(2, '0');
+    const dStr = getDbKey(dateObj);
     const yt = getYearlyTimings(dateObj);
     if (ramzanData[dStr]) {
         return { isRamzan: true, hijri: ramzanData[dStr].hijri, saher: ramzanData[dStr].saher, iftar: ramzanData[dStr].iftar, fajr: yt.fajr, sunrise: yt.sunrise, zohr: yt.zohr, asr: yt.asr, maghrib: yt.maghrib, isha: yt.isha, tahajjud: yt.tahajjud };
@@ -631,10 +637,6 @@ function switchTab(e,id){
 }
 
 // --- DATABASE AND TOGGLE LOGIC ---
-function getDbKey(dateObj) { 
-    return dateObj.getFullYear() + '-' + String(dateObj.getMonth() + 1).padStart(2, '0') + '-' + String(dateObj.getDate()).padStart(2, '0'); 
-}
-
 function markPrayer(prayerName, isChecked) {
     const now = new Date(); const key = getDbKey(now);
     if (!dbTracking[key]) dbTracking[key] = { tahajjud: false, fajr: false, zohr: false, asr: false, maghrib: false, isha: false };
@@ -656,16 +658,6 @@ function calcScore(dayData) {
     if(dayData.fajr) score += 20; if(dayData.zohr) score += 20; if(dayData.asr) score += 20;
     if(dayData.maghrib) score += 20; if(dayData.isha) score += 20; if(dayData.tahajjud) score += 20;
     return score;
-}
-
-function getHijriStr(dateObj) {
-    const ramzanStart = new Date(2026, 1, 19); 
-    const diff = Math.floor((dateObj - ramzanStart) / 86400000);
-    let d = diff + 1; let m = 9; let y = 1447;
-    while (d > 30) { d -= 30; m++; } while (d < 1) { d += 30; m--; }
-    while (m > 12) { m -= 12; y++; } while (m < 1) { m += 12; y--; }
-    const months = ["Muharram","Safar","Rabi I","Rabi II","Jumada I","Jumada II","Rajab","Shaban","Ramzan","Shawwal","Dhu al-Q.","Dhu al-H."];
-    return `${d} ${months[m-1]}`;
 }
 
 function renderDatabase() {
@@ -690,10 +682,9 @@ function renderDatabase() {
         if(isToday) tr.classList.add('today-row');
         
         const getIcon = (val) => val ? '<i class="fas fa-check-circle db-yes"></i>' : '<i class="fas fa-times-circle db-no"></i>';
-        const hijriStr = getHijriStr(loopDate);
         
         tr.innerHTML = `
-            <td>${i} ${loopDate.toLocaleString('default',{month:'short'})}<br><small class="time-sub">${hijriStr}</small></td>
+            <td>${i} ${loopDate.toLocaleString('default',{month:'short'})}</td>
             <td>${getIcon(data.tahajjud)}</td><td>${getIcon(data.fajr)}</td><td>${getIcon(data.zohr)}</td>
             <td>${getIcon(data.asr)}</td><td>${getIcon(data.maghrib)}</td><td>${getIcon(data.isha)}</td>
             <td style="font-weight:900; color: ${score >= 100 ? '#10b981' : (score > 0 ? 'var(--p)' : '#ef4444')}">${score}%</td>
@@ -782,6 +773,15 @@ function renderTimeTable() {
     }
 }
 
+// Safely parses "HH:MM" into a Date object based on a given day
+function parseTime(timeStr, baseDate) {
+    if (!timeStr) return new Date();
+    const [h, m] = timeStr.split(':');
+    const d = new Date(baseDate.getTime());
+    d.setHours(parseInt(h, 10), parseInt(m, 10), 0, 0);
+    return d;
+}
+
 // --- MAIN LOOP ---
 function update(){
     const now = new Date(); loadTodayToggles(now);
@@ -790,24 +790,29 @@ function update(){
     document.getElementById('row-seh').style.display = isRamzan ? 'flex' : 'none';
     document.getElementById('row-ift').style.display = isRamzan ? 'flex' : 'none';
     
-    const t_tah = new Date(now.toDateString()+' '+curD.tahajjud);
-    const t_fajr = new Date(now.toDateString()+' '+curD.fajr);
-    const t_sun = new Date(now.toDateString()+' '+curD.sunrise);
-    const t_zohr = new Date(now.toDateString()+' '+curD.zohr);
-    const t_asr = new Date(now.toDateString()+' '+curD.asr);
-    const t_maghrib = new Date(now.toDateString()+' '+curD.maghrib);
-    const t_isha = new Date(now.toDateString()+' '+curD.isha);
+    // SAFE UPDATE FOR HEADER DATES
+    document.getElementById('r-head').innerText = isRamzan ? (curD.hijri + " Ramzan 1447 AH") : "Daily Namaz Timings";
+    document.getElementById('c-head').innerText = now.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'short',year:'numeric'});
+
+    const t_tah = parseTime(curD.tahajjud, now);
+    const t_fajr = parseTime(curD.fajr, now);
+    const t_sun = parseTime(curD.sunrise, now);
+    const t_zohr = parseTime(curD.zohr, now);
+    const t_asr = parseTime(curD.asr, now);
+    const t_maghrib = parseTime(curD.maghrib, now);
+    const t_isha = parseTime(curD.isha, now);
     
-    const tomDObj = new Date(now.getTime()+86400000); const tomTimings = getTimingsForDate(tomDObj);
-    const n_tah = new Date(tomDObj.toDateString()+' '+tomTimings.tahajjud);
-    const n_fajr = new Date(tomDObj.toDateString()+' '+tomTimings.fajr);
+    const tomDObj = new Date(now.getTime()+86400000); 
+    const tomTimings = getTimingsForDate(tomDObj);
+    const n_tah = parseTime(tomTimings.tahajjud, tomDObj);
+    const n_fajr = parseTime(tomTimings.fajr, tomDObj);
 
     let targetM, labelM, pT, pL, activeRowId = '';
 
     if (isRamzan) {
-        const r_saher = new Date(now.toDateString()+' '+curD.saher);
-        const r_iftar = new Date(now.toDateString()+' '+curD.iftar);
-        const n_saher = new Date(tomDObj.toDateString()+' '+(tomTimings.saher || tomTimings.fajr));
+        const r_saher = parseTime(curD.saher, now);
+        const r_iftar = parseTime(curD.iftar, now);
+        const n_saher = parseTime(tomTimings.saher || tomTimings.fajr, tomDObj);
 
         if (now < r_saher) { targetM = r_saher; labelM = "Sehri Ends in "; }
         else if (now < r_iftar) { targetM = r_iftar; labelM = "Iftar Begins in"; }
@@ -847,8 +852,6 @@ function update(){
     if (isRamzan) document.getElementById('v-ift').innerText = formatAMPM(curD.iftar);
     document.getElementById('v-mag').innerText = `${formatAMPM(curD.maghrib)} - ${formatAMPM(curD.isha)}`;
     document.getElementById('v-ish').innerText = `${formatAMPM(curD.isha)} - ${formatAMPM(tomTimings.fajr)}`;
-
-    currentTimingsText = `${isRamzan ? curD.hijri+' Ramzan 1447 AH' : getHijriStr(now)}\nTahajjud: ${formatAMPM(curD.tahajjud)}\n` + (isRamzan ? `Sehri: ${formatAMPM(curD.saher)}\n` : '') + `Fajr: ${formatAMPM(curD.fajr)}\nZohr: ${formatAMPM(curD.zohr)}\nAsr: ${formatAMPM(curD.asr)}\n` + (isRamzan ? `Iftar: ${formatAMPM(curD.iftar)}\n` : '') + `Maghrib: ${formatAMPM(curD.maghrib)}\nIsha: ${formatAMPM(curD.isha)}`;
 }
 
 async function loadQuran() {
@@ -897,10 +900,7 @@ renderDatabase();
 setInterval(update, 1000); 
 update(); 
 loadQuran();
-window.addEventListener('DOMContentLoaded', () => {
-    updateDaily(new Date());
-    loadSurahList();
-});
+
 </script>
 </body>
 </html>
