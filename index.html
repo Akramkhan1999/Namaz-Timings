@@ -897,7 +897,10 @@ renderDatabase();
 setInterval(update, 1000); 
 update(); 
 loadQuran();
-
+window.addEventListener('DOMContentLoaded', () => {
+    updateDaily(new Date());
+    loadSurahList();
+});
 </script>
 </body>
 </html>
