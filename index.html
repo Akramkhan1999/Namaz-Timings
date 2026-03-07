@@ -1100,15 +1100,20 @@ function exportToPDF() {
     <tbody>${rows}</tbody></table>
     <div class="sum">Total Days: ${totalDays} &nbsp;|&nbsp; Average Score: ${avg}%</div>
     </body></html>`;
-    // Use data: URI — works in Android WebView (no blob URLs, no file access needed)
-    const encoded = 'data:text/html;charset=utf-8,' + encodeURIComponent(pdfHTML);
-    const a = document.createElement('a');
-    a.href = encoded;
-    a.download = 'namaz-record-' + fromStr + '-to-' + toStr + '.html';
-    a.style.display = 'none';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
+    const filename = 'namaz-record-' + fromStr + '-to-' + toStr + '.html';
+    if (window.AndroidBridge && AndroidBridge.downloadFile) {
+        // Android WebView: pass content to Kotlin to write to Downloads folder
+        AndroidBridge.downloadFile(pdfHTML, filename);
+    } else {
+        // Browser fallback: data URI download
+        const encoded = 'data:text/html;charset=utf-8,' + encodeURIComponent(pdfHTML);
+        const a = document.createElement('a');
+        a.href = encoded;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
     closeExportModal();
 }
 
