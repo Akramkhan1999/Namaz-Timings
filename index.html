@@ -189,7 +189,6 @@
             <div id="user-info" class="auth-info">Signed in as: <span id="user-email" class="auth-email"></span></div>
             <button id="logout-btn" class="t-btn" style="width:100%; display:none; color:#ef4444; margin-bottom:8px;" onclick="logoutUser()">🚪 Logout</button>
             <button id="login-btn" class="t-btn" style="width:100%; margin-bottom:8px;" onclick="goToLogin()">🔐 Sign In / Sign Up</button>
-            <button id="reset-btn" class="t-btn" style="width:100%; display:none; color:#ef4444; border-color:#ef4444;" onclick="confirmReset()">🗑️ Reset All Data</button>
         </div>
 
         <div class="modal-title">Select Theme</div>
@@ -383,7 +382,6 @@ let currentUser = null;
 let syncDebounceTimer = null;
 let autoSyncInterval = null;
 let firestoreUnsubscribe = null;  // real-time listener handle
-let isResetting = false;           // blocks saveToCloud during reset
 
 // Auth State
 auth.onAuthStateChanged((user) => {
@@ -391,14 +389,12 @@ auth.onAuthStateChanged((user) => {
     const userEmail = document.getElementById('user-email');
     const logoutBtn = document.getElementById('logout-btn');
     const loginBtn = document.getElementById('login-btn');
-    const resetBtn = document.getElementById('reset-btn');
     if (user) {
         currentUser = user;
         userInfo.style.display = "block";
         userEmail.innerText = user.email || 'User';
         logoutBtn.style.display = "block";
         loginBtn.style.display = "none";
-        resetBtn.style.display = "block";
         // Real-time listener: updates this device instantly when other device changes data
         if (firestoreUnsubscribe) firestoreUnsubscribe();
         firestoreUnsubscribe = db.collection('elite_users').doc(user.uid)
@@ -414,7 +410,6 @@ auth.onAuthStateChanged((user) => {
         currentUser = null;
         userInfo.style.display = "none";
         if(logoutBtn) logoutBtn.style.display = "none";
-        if(resetBtn) resetBtn.style.display = "none";
         loginBtn.style.display = "block";
         if (firestoreUnsubscribe) { firestoreUnsubscribe(); firestoreUnsubscribe = null; }
         if (autoSyncInterval) { clearInterval(autoSyncInterval); autoSyncInterval = null; }
@@ -459,7 +454,7 @@ async function syncDataFromCloud() {
 }
 
 function saveToCloud() {
-    if (!currentUser || isResetting) return;
+    if (!currentUser) return;
     db.collection('elite_users').doc(currentUser.uid).set({
         trackingData: dbTracking,
         lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
@@ -497,61 +492,7 @@ async function manualSync() {
     setTimeout(() => { icon.className = 'fas fa-cloud-upload-alt'; btn.style.borderColor = ''; btn.style.color = ''; }, 2500);
 }
 
-function confirmReset() {
-    closeSettings();
-    // Two-step confirmation to prevent accidental wipe
-    if (!confirm('⚠️ Reset ALL prayer data?\n\nThis will delete everything from your device AND the cloud. This cannot be undone.')) return;
-    if (!confirm('Are you 100% sure? All your records will be permanently deleted.')) return;
-    resetAllData();
-}
 
-async function resetAllData() {
-    // Block ALL saves immediately
-    isResetting = true;
-
-    // Detach listener and interval so nothing can write back
-    if (firestoreUnsubscribe) { firestoreUnsubscribe(); firestoreUnsubscribe = null; }
-    if (autoSyncInterval) { clearInterval(autoSyncInterval); autoSyncInterval = null; }
-
-    // Wipe everything local first
-    dbTracking = {};
-    localStorage.clear(); // nuke ALL local storage for this app
-
-    // Refresh UI to show empty state immediately
-    renderDatabase();
-    loadTodayToggles(new Date());
-
-    // Delete cloud doc — await so it fully completes before we do anything else
-    if (currentUser) {
-        try {
-            await db.collection('elite_users').doc(currentUser.uid).delete();
-        } catch(e) { console.error('Reset cloud error:', e); }
-    }
-
-    // Allow saves again
-    isResetting = false;
-
-    // Re-attach fresh listener — now cloud doc doesn't exist, so doc.exists=false → empty
-    if (currentUser) {
-        firestoreUnsubscribe = db.collection('elite_users').doc(currentUser.uid)
-            .onSnapshot((doc) => {
-                if (isResetting) return; // extra guard
-                const cloudData = doc.exists ? (doc.data().trackingData || {}) : {};
-                dbTracking = cloudData;
-                localStorage.setItem('elite_namaz_db', JSON.stringify(dbTracking));
-                renderDatabase();
-                loadTodayToggles(new Date());
-            }, (err) => console.error('Snapshot error:', err));
-    }
-
-    // Show tick on sync icon
-    const icon = document.getElementById('sync-icon');
-    const btn = document.getElementById('sync-btn');
-    icon.className = 'fas fa-check';
-    btn.style.color = '#10b981';
-    btn.style.borderColor = '#10b981';
-    setTimeout(() => { icon.className = 'fas fa-cloud-upload-alt'; btn.style.borderColor = ''; btn.style.color = ''; }, 2500);
-}
 
 // --- FONT SIZE CONTROLS ---
 let currentArFontSize = 1.4;
