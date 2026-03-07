@@ -60,12 +60,14 @@
         .brand-icon-wrap { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: var(--shadow); overflow: hidden; background: transparent; }
         .brand-img { width: 100%; height: 100%; object-fit: cover; }
         .brand-text { display: flex; flex-direction: column; justify-content: center; }
-        .app-title { font-size: 1.15rem; font-weight: 900; letter-spacing: 1px; color: var(--text); line-height: 1.1; text-transform: uppercase; }
+        .app-title { font-size: 0.95rem; font-weight: 900; letter-spacing: 0.5px; color: var(--text); line-height: 1.1; text-transform: uppercase; white-space: nowrap; }
         .app-subtitle { font-size: 0.7rem; font-weight: 800; color: var(--text); opacity: 0.7; margin-top: 2px; text-transform: lowercase; }
         .brand-highlight { color: var(--p); font-weight: 900; transition: color 0.3s; text-transform: capitalize; }
-        .top-controls { display: flex; gap: 12px; }
-        .sq-btn { width: 48px; height: 48px; border-radius: 16px; background: var(--card); border: 1px solid var(--b); color: var(--text); font-size: 1.4rem; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow); transition: transform 0.2s ease; }
+        .top-controls { display: flex; gap: 8px; }
+        .sq-btn { width: 38px; height: 38px; border-radius: 12px; background: var(--card); border: 1px solid var(--b); color: var(--text); font-size: 1rem; display: flex; align-items: center; justify-content: center; cursor: pointer; box-shadow: var(--shadow); transition: transform 0.2s ease; }
         .sq-btn:active { transform: scale(0.9); }
+        .sq-btn.syncing i { animation: spin 1s linear infinite; }
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
         /* SETTINGS MODAL */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: var(--modal-bg); z-index: 1000; display: none; align-items: center; justify-content: center; opacity: 0; transition: opacity 0.3s; backdrop-filter: blur(5px); }
@@ -172,6 +174,7 @@
         </div>
     </div>
     <div class="top-controls">
+        <button class="sq-btn" id="sync-btn" onclick="manualSync()" title="Sync data"><i id="sync-icon" class="fas fa-cloud-upload-alt"></i></button>
         <button class="sq-btn" onclick="toggleLightDark()"><i id="ld-icon" class="fas fa-sun"></i></button>
         <button class="sq-btn" onclick="openSettings()"><i class="fas fa-cog"></i></button>
     </div>
@@ -182,12 +185,11 @@
         <span class="close-btn" onclick="closeSettings()">&times;</span>
         
         <div class="auth-container">
-            <div class="modal-title" style="margin-bottom: 10px;">Cloud Sync</div>
-            <div id="user-info" class="auth-info">Logged in as: <span id="user-email" class="auth-email"></span></div>
-            <button id="auth-btn" class="t-btn btn-google" style="width: 100%;">
-                <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
-                <span>Sign in with Google</span>
-            </button>
+            <div class="modal-title" style="margin-bottom: 10px;">☁️ Account</div>
+            <div id="user-info" class="auth-info">Signed in as: <span id="user-email" class="auth-email"></span></div>
+            <button id="logout-btn" class="t-btn" style="width:100%; display:none; color:#ef4444; margin-bottom:8px;" onclick="logoutUser()">🚪 Logout</button>
+            <button id="login-btn" class="t-btn" style="width:100%; margin-bottom:8px;" onclick="goToLogin()">🔐 Sign In / Sign Up</button>
+            <button id="reset-btn" class="t-btn" style="width:100%; display:none; color:#ef4444; border-color:#ef4444;" onclick="confirmReset()">🗑️ Reset All Data</button>
         </div>
 
         <div class="modal-title">Select Theme</div>
@@ -217,9 +219,9 @@
 
 <div class="container">
     <div class="tab-nav">
-        <div class="tab active" onclick="switchTab(event,'live')">Live Tracker</div>
-        <div class="tab" id="tab-data" onclick="switchTab(event,'data')">TimeTable</div>
-        <div class="tab" onclick="switchTab(event,'db')">Database</div>
+        <div class="tab active" onclick="switchTab(event,'live')">Today</div>
+        <div class="tab" id="tab-data" onclick="switchTab(event,'data')">Namaz Times</div>
+        <div class="tab" onclick="switchTab(event,'db')">Dashboard</div>
         <div class="tab" onclick="switchTab(event,'surah')">Surah</div>
     </div>
     
@@ -282,7 +284,8 @@
         
         <div class="db-header-row">
             <h3 class="db-title">Monthly Record</h3>
-            <select id="month-select" class="month-dropdown" onchange="renderDatabase()">
+            <div style="display:flex;gap:8px;align-items:center;">
+                <select id="month-select" class="month-dropdown" onchange="renderDatabase()">
                 <option value="0">January</option>
                 <option value="1">February</option>
                 <option value="2">March</option>
@@ -295,7 +298,9 @@
                 <option value="9">October</option>
                 <option value="10">November</option>
                 <option value="11">December</option>
-            </select>
+                </select>
+                <button class="sq-btn" onclick="openExportModal()" title="Export PDF" style="flex-shrink:0;"><i class="fas fa-file-pdf"></i></button>
+            </div>
         </div>
 
         <div class="table-container" style="max-height: 45vh;">
@@ -350,7 +355,7 @@
 </div>
 
 <div class="contact-section">
-    <div class="contact-text">Contact the Developer</div>
+    <div class="contact-text">Contact the App Developer</div>
     <div class="social-circles">
         <a href="https://wa.me/919603611435" target="_blank" class="s-circle wa-c"><i class="fab fa-whatsapp"></i></a>
         <a href="https://www.instagram.com/type01warrior/" target="_blank" class="s-circle ig-c"><i class="fab fa-instagram"></i></a>
@@ -375,44 +380,66 @@ if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
 const auth = firebase.auth();
 const db = firebase.firestore();
 let currentUser = null;
+let syncDebounceTimer = null;
+let autoSyncInterval = null;
+let firestoreUnsubscribe = null;  // real-time listener handle
+let isResetting = false;           // blocks saveToCloud during reset
 
-// Listen for Authentication State Changes
+// Auth State
 auth.onAuthStateChanged((user) => {
-    const authBtn = document.getElementById('auth-btn');
     const userInfo = document.getElementById('user-info');
     const userEmail = document.getElementById('user-email');
-
+    const logoutBtn = document.getElementById('logout-btn');
+    const loginBtn = document.getElementById('login-btn');
+    const resetBtn = document.getElementById('reset-btn');
     if (user) {
         currentUser = user;
-        authBtn.innerHTML = "<span>Sign Out</span>";
-        authBtn.style.background = "#ef4444";
-        authBtn.style.color = "#ffffff";
-        authBtn.style.border = "none";
         userInfo.style.display = "block";
-        userEmail.innerText = user.email;
-        
-        syncDataFromCloud();
+        userEmail.innerText = user.email || 'User';
+        logoutBtn.style.display = "block";
+        loginBtn.style.display = "none";
+        resetBtn.style.display = "block";
+        // Real-time listener: updates this device instantly when other device changes data
+        if (firestoreUnsubscribe) firestoreUnsubscribe();
+        firestoreUnsubscribe = db.collection('elite_users').doc(user.uid)
+            .onSnapshot((doc) => {
+                // Cloud is always source of truth — replace local entirely
+                const cloudData = doc.exists ? (doc.data().trackingData || {}) : {};
+                dbTracking = cloudData;
+                localStorage.setItem('elite_namaz_db', JSON.stringify(dbTracking));
+                renderDatabase();
+                loadTodayToggles(new Date());
+            }, (err) => console.error('Snapshot error:', err));
     } else {
         currentUser = null;
-        authBtn.innerHTML = "<img src='https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg' alt='Google'><span>Sign in with Google</span>";
-        authBtn.style.background = "#ffffff";
-        authBtn.style.color = "#757575";
-        authBtn.style.border = "1px solid #ddd";
         userInfo.style.display = "none";
-        userEmail.innerText = "";
+        if(logoutBtn) logoutBtn.style.display = "none";
+        if(resetBtn) resetBtn.style.display = "none";
+        loginBtn.style.display = "block";
+        if (firestoreUnsubscribe) { firestoreUnsubscribe(); firestoreUnsubscribe = null; }
+        if (autoSyncInterval) { clearInterval(autoSyncInterval); autoSyncInterval = null; }
     }
 });
 
-document.getElementById('auth-btn').addEventListener('click', () => {
-    if (currentUser) {
-        auth.signOut();
+function goToLogin() {
+    if(window.AndroidBridge) {
+        AndroidBridge.openLogin();
     } else {
-        const provider = new firebase.auth.GoogleAuthProvider();
-        auth.signInWithPopup(provider).catch(err => {
-            alert("Error: " + err.message);
-        });
+        window.location.href = 'login.html';
     }
-});
+}
+
+
+function logoutUser() {
+    auth.signOut().then(() => {
+        currentUser = null;
+        if(window.AndroidBridge) {
+            AndroidBridge.openLogin();
+        } else {
+            window.location.replace('login.html');
+        }
+    }).catch(e => console.error("Logout error:", e));
+}
 
 async function syncDataFromCloud() {
     if (!currentUser) return;
@@ -432,13 +459,99 @@ async function syncDataFromCloud() {
 }
 
 function saveToCloud() {
-    if (!currentUser) return;
+    if (!currentUser || isResetting) return;
     db.collection('elite_users').doc(currentUser.uid).set({
         trackingData: dbTracking,
         lastUpdated: firebase.firestore.FieldValue.serverTimestamp()
     }, { merge: true }).catch(err => console.error("Cloud save error:", err));
 }
 
+
+async function manualSync() {
+    const btn = document.getElementById('sync-btn');
+    const icon = document.getElementById('sync-icon');
+    if (!currentUser) {
+        icon.className = 'fas fa-times';
+        btn.style.borderColor = '#ef4444';
+        btn.style.color = '#ef4444';
+        setTimeout(() => { icon.className = 'fas fa-cloud-upload-alt'; btn.style.borderColor = ''; btn.style.color = ''; }, 2000);
+        return;
+    }
+    btn.classList.add('syncing');
+    icon.className = 'fas fa-sync-alt';
+    btn.style.borderColor = 'var(--p)';
+    btn.style.color = 'var(--p)';
+    try {
+        await syncDataFromCloud();
+        saveToCloud();
+        btn.classList.remove('syncing');
+        icon.className = 'fas fa-check';
+        btn.style.color = '#10b981';
+        btn.style.borderColor = '#10b981';
+    } catch(e) {
+        btn.classList.remove('syncing');
+        icon.className = 'fas fa-times';
+        btn.style.color = '#ef4444';
+        btn.style.borderColor = '#ef4444';
+    }
+    setTimeout(() => { icon.className = 'fas fa-cloud-upload-alt'; btn.style.borderColor = ''; btn.style.color = ''; }, 2500);
+}
+
+function confirmReset() {
+    closeSettings();
+    // Two-step confirmation to prevent accidental wipe
+    if (!confirm('⚠️ Reset ALL prayer data?\n\nThis will delete everything from your device AND the cloud. This cannot be undone.')) return;
+    if (!confirm('Are you 100% sure? All your records will be permanently deleted.')) return;
+    resetAllData();
+}
+
+async function resetAllData() {
+    // Block ALL saves immediately
+    isResetting = true;
+
+    // Detach listener and interval so nothing can write back
+    if (firestoreUnsubscribe) { firestoreUnsubscribe(); firestoreUnsubscribe = null; }
+    if (autoSyncInterval) { clearInterval(autoSyncInterval); autoSyncInterval = null; }
+
+    // Wipe everything local first
+    dbTracking = {};
+    localStorage.clear(); // nuke ALL local storage for this app
+
+    // Refresh UI to show empty state immediately
+    renderDatabase();
+    loadTodayToggles(new Date());
+
+    // Delete cloud doc — await so it fully completes before we do anything else
+    if (currentUser) {
+        try {
+            await db.collection('elite_users').doc(currentUser.uid).delete();
+        } catch(e) { console.error('Reset cloud error:', e); }
+    }
+
+    // Allow saves again
+    isResetting = false;
+
+    // Re-attach fresh listener — now cloud doc doesn't exist, so doc.exists=false → empty
+    if (currentUser) {
+        firestoreUnsubscribe = db.collection('elite_users').doc(currentUser.uid)
+            .onSnapshot((doc) => {
+                if (isResetting) return; // extra guard
+                const cloudData = doc.exists ? (doc.data().trackingData || {}) : {};
+                dbTracking = cloudData;
+                localStorage.setItem('elite_namaz_db', JSON.stringify(dbTracking));
+                renderDatabase();
+                loadTodayToggles(new Date());
+            }, (err) => console.error('Snapshot error:', err));
+    }
+
+    // Show tick on sync icon
+    const icon = document.getElementById('sync-icon');
+    const btn = document.getElementById('sync-btn');
+    icon.className = 'fas fa-check';
+    btn.style.color = '#10b981';
+    btn.style.borderColor = '#10b981';
+    setTimeout(() => { icon.className = 'fas fa-cloud-upload-alt'; btn.style.borderColor = ''; btn.style.color = ''; }, 2500);
+}
 
 // --- FONT SIZE CONTROLS ---
 let currentArFontSize = 1.4;
@@ -646,6 +759,16 @@ function markPrayer(prayerName, isChecked) {
     saveToCloud();
 }
 
+function togglePastPrayer(key, prayerName) {
+    if (!dbTracking[key]) dbTracking[key] = { tahajjud: false, fajr: false, zohr: false, asr: false, maghrib: false, isha: false };
+    dbTracking[key][prayerName] = !dbTracking[key][prayerName];
+    // Keep the key even if all false — deleting it causes cloud to restore old data
+    localStorage.setItem('elite_namaz_db', JSON.stringify(dbTracking));
+    renderDatabase();
+    loadTodayToggles(new Date());
+    saveToCloud();
+}
+
 function loadTodayToggles(now) {
     const key = getDbKey(now); const dayData = dbTracking[key] || {};
     ['tahajjud','fajr','zohr','asr','maghrib','isha'].forEach(p => {
@@ -681,12 +804,14 @@ function renderDatabase() {
         const isToday = (key === todayStr); const tr = document.createElement('tr');
         if(isToday) tr.classList.add('today-row');
         
-        const getIcon = (val) => val ? '<i class="fas fa-check-circle db-yes"></i>' : '<i class="fas fa-times-circle db-no"></i>';
+        const getIcon = (val, key, prayer) => val
+            ? `<i class="fas fa-check-circle db-yes" onclick="togglePastPrayer('${key}','${prayer}')" style="cursor:pointer;" title="Click to unmark"></i>`
+            : `<i class="fas fa-times-circle db-no" onclick="togglePastPrayer('${key}','${prayer}')" style="cursor:pointer;" title="Click to mark"></i>`;
         
         tr.innerHTML = `
             <td>${i} ${loopDate.toLocaleString('default',{month:'short'})}</td>
-            <td>${getIcon(data.tahajjud)}</td><td>${getIcon(data.fajr)}</td><td>${getIcon(data.zohr)}</td>
-            <td>${getIcon(data.asr)}</td><td>${getIcon(data.maghrib)}</td><td>${getIcon(data.isha)}</td>
+            <td>${getIcon(data.tahajjud, key, 'tahajjud')}</td><td>${getIcon(data.fajr, key, 'fajr')}</td><td>${getIcon(data.zohr, key, 'zohr')}</td>
+            <td>${getIcon(data.asr, key, 'asr')}</td><td>${getIcon(data.maghrib, key, 'maghrib')}</td><td>${getIcon(data.isha, key, 'isha')}</td>
             <td style="font-weight:900; color: ${score >= 100 ? '#10b981' : (score > 0 ? 'var(--p)' : '#ef4444')}">${score}%</td>
         `;
         tbody.appendChild(tr);
@@ -902,5 +1027,144 @@ update();
 loadQuran();
 
 </script>
+
+<!-- EXPORT PDF MODAL -->
+<div id="export-modal" class="modal-overlay" onclick="if(event.target===this)closeExportModal()">
+    <div class="modal-content" style="max-width:340px;">
+        <span class="close-btn" onclick="closeExportModal()">&times;</span>
+        <div class="modal-title">📄 Export to PDF</div>
+        <p style="font-size:0.8rem;color:var(--sub);margin-bottom:16px;">Select the date range to export your prayer records.</p>
+        <div style="margin-bottom:12px;">
+            <label class="lbl" style="font-size:0.7rem;color:var(--sub);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">From</label>
+            <input type="date" id="export-from" style="width:100%;padding:10px 14px;background:var(--row-bg);color:var(--text);border:2px solid var(--b);border-radius:10px;font-size:0.9rem;outline:none;font-weight:700;">
+        </div>
+        <div style="margin-bottom:20px;">
+            <label class="lbl" style="font-size:0.7rem;color:var(--sub);display:block;margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px;">To</label>
+            <input type="date" id="export-to" style="width:100%;padding:10px 14px;background:var(--row-bg);color:var(--text);border:2px solid var(--b);border-radius:10px;font-size:0.9rem;outline:none;font-weight:700;">
+        </div>
+        <button class="btn" style="background:var(--p);color:var(--btn-text);border-radius:12px;padding:14px;font-size:0.9rem;" onclick="exportToPDF()">Export PDF</button>
+    </div>
+</div>
+
+<style>
+#export-from, #export-to { color-scheme: dark; }
+body.light-mode #export-from, body.light-mode #export-to { color-scheme: light; }
+</style>
+
 </body>
-</html>
+</html><script>
+// ── EXPORT PDF ──────────────────────────────────────────────────────────────
+function openExportModal() {
+    const now = new Date();
+    const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+    document.getElementById('export-from').value = getDbKey(firstOfMonth);
+    document.getElementById('export-to').value = getDbKey(now);
+    document.getElementById('export-modal').classList.add('show');
+}
+function closeExportModal() { document.getElementById('export-modal').classList.remove('show'); }
+
+function exportToPDF() {
+    const fromStr = document.getElementById('export-from').value;
+    const toStr = document.getElementById('export-to').value;
+    if (!fromStr || !toStr) { alert('Please select both dates.'); return; }
+    const from = new Date(fromStr + 'T00:00:00');
+    const to = new Date(toStr + 'T00:00:00');
+    if (from > to) { alert('"From" date must be before "To" date.'); return; }
+
+    const prayers = ['tahajjud','fajr','zohr','asr','maghrib','isha'];
+    const pLabels = ['Tahajjud','Fajr','Zohr','Asr','Maghrib','Isha'];
+    let rows = ''; let totalDays = 0; let totalScore = 0;
+
+    for (let d = new Date(from); d <= to; d.setDate(d.getDate() + 1)) {
+        const key = getDbKey(d);
+        const data = dbTracking[key] || {};
+        const score = calcScore(data);
+        totalDays++; totalScore += score;
+        const dateStr = d.toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' });
+        const checks = prayers.map(p => data[p]
+            ? '<td style="color:#10b981;text-align:center;font-size:1.1rem">✓</td>'
+            : '<td style="color:#ef4444;text-align:center;font-size:1.1rem">✗</td>'
+        ).join('');
+        const sc = score >= 100 ? '#10b981' : score > 0 ? '#f59e0b' : '#ef4444';
+        rows += `<tr><td>${dateStr}</td>${checks}<td style="font-weight:900;color:${sc};text-align:center">${score}%</td></tr>`;
+    }
+    const avg = totalDays ? Math.round(totalScore / totalDays) : 0;
+    const pdfHTML = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Namaz Export</title>
+    <style>body{font-family:sans-serif;padding:30px;color:#111}h1{font-size:1.4rem;margin-bottom:4px}
+    .sub{color:#666;font-size:0.8rem;margin-bottom:20px}table{width:100%;border-collapse:collapse;font-size:0.8rem}
+    th{background:#1a1a2e;color:#fbbf24;padding:10px;text-align:center}td{padding:8px 10px;border-bottom:1px solid #eee}
+    tr:nth-child(even){background:#f9f9f9}.sum{margin-top:20px;font-weight:bold;color:#444}</style></head>
+    <body><h1>🕌 Namaz Tracker — Prayer Record</h1>
+    <div class="sub">Period: ${fromStr} → ${toStr} &nbsp;|&nbsp; Exported: ${new Date().toLocaleDateString()}</div>
+    <table><thead><tr><th>Date</th>${pLabels.map(l=>'<th>'+l+'</th>').join('')}<th>Score</th></tr></thead>
+    <tbody>${rows}</tbody></table>
+    <div class="sum">Total Days: ${totalDays} &nbsp;|&nbsp; Average Score: ${avg}%</div>
+    </body></html>`;
+    // Use data: URI — works in Android WebView (no blob URLs, no file access needed)
+    const encoded = 'data:text/html;charset=utf-8,' + encodeURIComponent(pdfHTML);
+    const a = document.createElement('a');
+    a.href = encoded;
+    a.download = 'namaz-record-' + fromStr + '-to-' + toStr + '.html';
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    closeExportModal();
+}
+
+// ── SWIPE GESTURES ───────────────────────────────────────────────────────────
+const TAB_ORDER = ['live', 'data', 'db', 'surah'];
+
+function getActiveTabIndex() {
+    const active = document.querySelector('.content.active');
+    return active ? TAB_ORDER.indexOf(active.id) : 0;
+}
+function goToTabByIndex(idx) {
+    if (idx < 0 || idx >= TAB_ORDER.length) return;
+    const id = TAB_ORDER[idx];
+    const tabEl = document.querySelectorAll('.tab')[idx];
+    const fakeEvent = { currentTarget: tabEl };
+    switchTab(fakeEvent, id);
+}
+
+(function initSwipe() {
+    const container = document.querySelector('.container');
+    let startX = 0, startY = 0, startScrollLeft = 0, scrollableEl = null;
+
+    container.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        // Find if touch started inside a horizontally scrollable element
+        scrollableEl = null;
+        let el = e.target;
+        while (el && el !== container) {
+            if (el.scrollWidth > el.clientWidth + 5) {
+                scrollableEl = el;
+                startScrollLeft = el.scrollLeft;
+                break;
+            }
+            el = el.parentElement;
+        }
+    }, { passive: true });
+
+    container.addEventListener('touchend', (e) => {
+        const dx = e.changedTouches[0].clientX - startX;
+        const dy = e.changedTouches[0].clientY - startY;
+
+        // Must be more horizontal than vertical, and at least 50px
+        if (Math.abs(dx) < 50 || Math.abs(dy) > Math.abs(dx) * 0.8) return;
+
+        // If inside a scrollable table, only switch tabs if already at the edge
+        if (scrollableEl) {
+            const scrolled = Math.abs(scrollableEl.scrollLeft - startScrollLeft) > 8;
+            if (scrolled) return; // table actually scrolled — don't switch tab
+            if (dx < 0 && scrollableEl.scrollLeft < scrollableEl.scrollWidth - scrollableEl.clientWidth - 5) return;
+            if (dx > 0 && scrollableEl.scrollLeft > 5) return;
+        }
+
+        const cur = getActiveTabIndex();
+        if (dx < 0) goToTabByIndex(cur + 1); // swipe left = next tab
+        else         goToTabByIndex(cur - 1); // swipe right = prev tab
+    }, { passive: true });
+})();
+</script>
