@@ -182,43 +182,46 @@
             margin-bottom: 7px;
         }
 
+        /* ── INPUT FIELDS ── */
         .input-wrap {
             position: relative;
+            display: flex;
+            align-items: center;
+            background: rgba(255,255,255,0.05);
+            border: 1.5px solid var(--b);
+            border-radius: 12px;
+            transition: border-color 0.2s, box-shadow 0.2s;
         }
 
-        .input-wrap i {
-            position: absolute;
-            left: 14px;
-            top: 50%;
-            transform: translateY(-50%);
+        .input-wrap:focus-within {
+            border-color: var(--p);
+            box-shadow: 0 0 0 3px rgba(201,168,76,0.15);
+        }
+
+        .input-wrap:focus-within .input-icon {
+            color: var(--p);
+        }
+
+        .input-icon {
+            padding: 0 0 0 14px;
             color: rgba(255,255,255,0.3);
             font-size: 0.85rem;
             pointer-events: none;
+            flex-shrink: 0;
             transition: color 0.2s;
         }
 
         .form-input {
-            width: 100%;
-            padding: 12px 14px 12px 40px;
-            background: rgba(255,255,255,0.05);
-            border: 1.5px solid var(--b);
-            border-radius: 12px;
+            flex: 1;
+            padding: 12px 10px;
+            background: transparent;
+            border: none;
             color: var(--text);
             font-size: 0.88rem;
             font-weight: 800;
             font-family: var(--font);
             outline: none;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-
-        .form-input:focus {
-            border-color: var(--p);
-            box-shadow: 0 0 0 3px rgba(201,168,76,0.15);
-        }
-
-        .form-input:focus + i,
-        .input-wrap:focus-within i {
-            color: var(--p);
+            min-width: 0;
         }
 
         .form-input::placeholder {
@@ -226,22 +229,21 @@
             font-weight: 800;
         }
 
-        /* password toggle */
+        /* password toggle — flex sibling, always inside box */
         .toggle-pw {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
+            flex-shrink: 0;
             background: none;
             border: none;
-            color: rgba(255,255,255,0.3);
+            color: rgba(255,255,255,0.35);
             cursor: pointer;
-            padding: 4px;
-            font-size: 0.85rem;
+            padding: 10px 14px;
+            font-size: 0.9rem;
+            line-height: 1;
             transition: color 0.2s;
+            -webkit-tap-highlight-color: transparent;
         }
 
-        .toggle-pw:hover { color: var(--p); }
+        .toggle-pw:active { color: var(--p); }
 
         /* ── BUTTONS ── */
         .btn-primary {
@@ -443,16 +445,16 @@
         <div class="form-group">
             <label class="form-label" for="login-email">Email Address</label>
             <div class="input-wrap">
+                <i class="fas fa-envelope input-icon"></i>
                 <input type="email" id="login-email" class="form-input" placeholder="you@example.com" autocomplete="email">
-                <i class="fas fa-envelope"></i>
             </div>
         </div>
 
         <div class="form-group">
             <label class="form-label" for="login-password">Password</label>
             <div class="input-wrap">
+                <i class="fas fa-lock input-icon"></i>
                 <input type="password" id="login-password" class="form-input" placeholder="••••••••" autocomplete="current-password">
-                <i class="fas fa-lock"></i>
                 <button class="toggle-pw" type="button" onclick="togglePw('login-password', this)" tabindex="-1">
                     <i class="fas fa-eye"></i>
                 </button>
@@ -490,16 +492,16 @@
         <div class="form-group">
             <label class="form-label" for="reg-email">Email Address</label>
             <div class="input-wrap">
+                <i class="fas fa-envelope input-icon"></i>
                 <input type="email" id="reg-email" class="form-input" placeholder="you@example.com" autocomplete="email">
-                <i class="fas fa-envelope"></i>
             </div>
         </div>
 
         <div class="form-group">
             <label class="form-label" for="reg-password">Password</label>
             <div class="input-wrap">
+                <i class="fas fa-lock input-icon"></i>
                 <input type="password" id="reg-password" class="form-input" placeholder="At least 6 characters" autocomplete="new-password">
-                <i class="fas fa-lock"></i>
                 <button class="toggle-pw" type="button" onclick="togglePw('reg-password', this)" tabindex="-1">
                     <i class="fas fa-eye"></i>
                 </button>
@@ -509,8 +511,8 @@
         <div class="form-group">
             <label class="form-label" for="reg-confirm">Confirm Password</label>
             <div class="input-wrap">
+                <i class="fas fa-lock input-icon"></i>
                 <input type="password" id="reg-confirm" class="form-input" placeholder="Repeat password" autocomplete="new-password">
-                <i class="fas fa-lock"></i>
                 <button class="toggle-pw" type="button" onclick="togglePw('reg-confirm', this)" tabindex="-1">
                     <i class="fas fa-eye"></i>
                 </button>
@@ -695,28 +697,24 @@
     }
 
     // ==========================================
-    // DETECT ENVIRONMENT (file:// blocks Google OAuth)
+    // DETECT ENVIRONMENT (file:// blocks Google OAuth popup)
     // ==========================================
-    // Google Sign-In via popup only works on https:// or localhost.
-    // On Android WebView (file:// protocol), it must go through the native bridge.
-    // If neither condition is met, hide the Google button entirely.
     const isFileProtocol = window.location.protocol === 'file:';
     const isAndroid = !!window.AndroidBridge;
-    const hasNativeGoogle = isAndroid && typeof AndroidBridge.openGoogleSignIn === 'function';
-    const googleAvailable = !isFileProtocol || hasNativeGoogle;
+    // On Android, native bridge now handles Google Sign-In — always show the button.
+    // On desktop, only show if we can do a popup (https:// or localhost).
+    const googleAvailable = isAndroid || !isFileProtocol;
 
     function applyGoogleButtonState() {
         ['google-section-login', 'google-section-reg'].forEach(id => {
             const section = document.getElementById(id);
             if (!section) return;
-            // Completely hide the Google section (button + divider) if unavailable
             section.style.display = googleAvailable ? 'block' : 'none';
         });
     }
 
     // Run after DOM is ready
     document.addEventListener('DOMContentLoaded', applyGoogleButtonState);
-    // Also run immediately in case DOM is already ready
     if (document.readyState !== 'loading') applyGoogleButtonState();
 
     // ==========================================
@@ -780,43 +778,45 @@
 
     // ==========================================
     // GOOGLE SIGN-IN
-    // Google OAuth requires a hosted (https:// or localhost) origin.
-    // file:// URLs are blocked by Google. On Android, the native bridge
-    // must implement openGoogleSignIn() to handle this natively.
+    // On Android: routes through AndroidBridge.openGoogleSignIn() (native picker).
+    // On desktop https://: uses Firebase popup.
     // ==========================================
     function doGoogleSignIn() {
-        // Determine which panel is active for showing errors
         const activePanel = document.getElementById('panel-register').classList.contains('active') ? 'register' : 'login';
-        const msgId = 'msg-' + activePanel;
-        const btnId = activePanel === 'login' ? 'btn-google-login' : 'btn-google-reg';
-        const spinnerId = activePanel === 'login' ? 'spinner-google-login' : 'spinner-google-reg';
-        const labelId = activePanel === 'login' ? 'label-google-login' : 'label-google-reg';
-
-        // Route to native Android Google Sign-In if available
-        if (window.AndroidBridge && typeof AndroidBridge.openGoogleSignIn === 'function') {
-            AndroidBridge.openGoogleSignIn();
-            return;
-        }
-
-        // Block early if on file:// — Google OAuth will always fail here
-        if (isFileProtocol) {
-            showMsg(msgId, 'Google Sign-In is not available in this environment. Please use Email/Password instead.', 'error');
-            return;
-        }
+        const msgId    = 'msg-' + activePanel;
+        const btnId    = activePanel === 'login' ? 'btn-google-login'    : 'btn-google-reg';
+        const spinnerId= activePanel === 'login' ? 'spinner-google-login': 'spinner-google-reg';
+        const labelId  = activePanel === 'login' ? 'label-google-login'  : 'label-google-reg';
 
         clearMessages();
-        const btn = document.getElementById(btnId);
-        const spinner = document.getElementById(spinnerId);
-        const label = document.getElementById(labelId);
+
+        // Show loading state
+        const btn    = document.getElementById(btnId);
+        const spinner= document.getElementById(spinnerId);
+        const label  = document.getElementById(labelId);
         btn.disabled = true;
         spinner.style.display = 'block';
         label.style.visibility = 'hidden';
 
+        // Route to native Android Google Sign-In
+        if (window.AndroidBridge && typeof AndroidBridge.openGoogleSignIn === 'function') {
+            AndroidBridge.openGoogleSignIn();
+            // Kotlin will call firebaseGoogleSignIn() or googleSignInError() when done
+            return;
+        }
+
+        // Desktop: block on file://, use popup on https://
+        if (isFileProtocol) {
+            btn.disabled = false;
+            spinner.style.display = 'none';
+            label.style.visibility = 'visible';
+            showMsg(msgId, 'Google Sign-In requires the app to be served over https://. Use Email/Password instead.', 'error');
+            return;
+        }
+
         const provider = new firebase.auth.GoogleAuthProvider();
         auth.signInWithPopup(provider)
-            .then(() => {
-                // onAuthStateChanged will fire and redirectToApp()
-            })
+            .then(() => { /* onAuthStateChanged fires → redirectToApp() */ })
             .catch((err) => {
                 btn.disabled = false;
                 spinner.style.display = 'none';
@@ -825,6 +825,50 @@
                     showMsg(msgId, friendlyError(err.code), 'error');
                 }
             });
+    }
+
+    // ==========================================
+    // CALLED BY KOTLIN after native Google Sign-In succeeds
+    // Kotlin passes the Google ID token; we sign into Firebase here.
+    // ==========================================
+    function firebaseGoogleSignIn(idToken) {
+        const credential = firebase.auth.GoogleAuthProvider.credential(idToken);
+        auth.signInWithCredential(credential)
+            .then(() => { /* onAuthStateChanged fires → redirectToApp() */ })
+            .catch((err) => {
+                // Reset button states
+                ['btn-google-login', 'btn-google-reg'].forEach(id => {
+                    const b = document.getElementById(id);
+                    if (b) b.disabled = false;
+                });
+                ['spinner-google-login', 'spinner-google-reg'].forEach(id => {
+                    const s = document.getElementById(id);
+                    if (s) s.style.display = 'none';
+                });
+                ['label-google-login', 'label-google-reg'].forEach(id => {
+                    const l = document.getElementById(id);
+                    if (l) l.style.visibility = 'visible';
+                });
+                const activePanel = document.getElementById('panel-register').classList.contains('active') ? 'register' : 'login';
+                showMsg('msg-' + activePanel, friendlyError(err.code), 'error');
+            });
+    }
+
+    // ==========================================
+    // CALLED BY KOTLIN when native Google Sign-In fails
+    // ==========================================
+    function googleSignInError(message) {
+        ['btn-google-login', 'btn-google-reg'].forEach(id => {
+            const b = document.getElementById(id); if (b) b.disabled = false;
+        });
+        ['spinner-google-login', 'spinner-google-reg'].forEach(id => {
+            const s = document.getElementById(id); if (s) s.style.display = 'none';
+        });
+        ['label-google-login', 'label-google-reg'].forEach(id => {
+            const l = document.getElementById(id); if (l) l.style.visibility = 'visible';
+        });
+        const activePanel = document.getElementById('panel-register').classList.contains('active') ? 'register' : 'login';
+        showMsg('msg-' + activePanel, 'Google Sign-In failed. Please try again or use Email/Password.', 'error');
     }
 
     // ==========================================
