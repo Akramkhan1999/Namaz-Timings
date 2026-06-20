@@ -672,20 +672,54 @@
 
     function friendlyError(code) {
         const map = {
-            'auth/invalid-email':           'Please enter a valid email address.',
-            'auth/user-not-found':          'No account found with this email.',
-            'auth/wrong-password':          'Incorrect password. Please try again.',
-            'auth/invalid-credential':      'Incorrect email or password.',
-            'auth/email-already-in-use':    'An account with this email already exists.',
-            'auth/weak-password':           'Password must be at least 6 characters.',
-            'auth/too-many-requests':       'Too many attempts. Please try again later.',
-            'auth/network-request-failed':  'Network error. Check your connection.',
-            'auth/popup-blocked':           'Popup was blocked. Please allow popups and try again.',
-            'auth/popup-closed-by-user':    'Sign-in was cancelled.',
-            'auth/cancelled-popup-request': 'Sign-in was cancelled.',
+            'auth/invalid-email':                               'Please enter a valid email address.',
+            'auth/user-not-found':                              'No account found with this email.',
+            'auth/wrong-password':                              'Incorrect password. Please try again.',
+            'auth/invalid-credential':                          'Incorrect email or password.',
+            'auth/email-already-in-use':                        'An account with this email already exists.',
+            'auth/weak-password':                               'Password must be at least 6 characters.',
+            'auth/too-many-requests':                           'Too many attempts. Please try again later.',
+            'auth/network-request-failed':                      'Network error. Check your connection.',
+            'auth/popup-blocked':                               'Popup was blocked. Please allow popups and try again.',
+            'auth/popup-closed-by-user':                        'Sign-in was cancelled.',
+            'auth/cancelled-popup-request':                     'Sign-in was cancelled.',
+            'auth/unauthorized-domain':                         'Google Sign-In is not available here. Please use Email/Password.',
+            'auth/operation-not-supported-in-this-environment': 'Google Sign-In is not supported in this environment. Please use Email/Password.',
+            'auth/internal-error':                              'An internal error occurred. Please try again.',
+            'auth/user-disabled':                               'This account has been disabled.',
+            'auth/account-exists-with-different-credential':    'An account already exists with the same email.',
         };
         return map[code] || 'Something went wrong. Please try again.';
     }
+
+    // ==========================================
+    // DETECT ENVIRONMENT (file:// blocks Google OAuth)
+    // ==========================================
+    const isFileProtocol = window.location.protocol === 'file:';
+    const hasAndroidGoogleBridge = window.AndroidBridge && typeof AndroidBridge.openGoogleSignIn === 'function';
+    const googleAvailable = !isFileProtocol || hasAndroidGoogleBridge;
+
+    function applyGoogleButtonState() {
+        ['btn-google-login', 'btn-google-reg'].forEach(id => {
+            const btn = document.getElementById(id);
+            if (!btn) return;
+            if (!googleAvailable) {
+                btn.disabled = true;
+                btn.style.opacity = '0.45';
+                btn.style.cursor = 'not-allowed';
+                btn.title = 'Google Sign-In is not available when opening the app as a local file. Use Email/Password instead.';
+                // Replace label text
+                const labelId = id === 'btn-google-login' ? 'label-google-login' : 'label-google-reg';
+                const label = document.getElementById(labelId);
+                if (label) label.innerHTML = 'Google Sign-In unavailable here';
+            }
+        });
+    }
+
+    // Run after DOM is ready
+    document.addEventListener('DOMContentLoaded', applyGoogleButtonState);
+    // Also run immediately in case DOM is already ready
+    if (document.readyState !== 'loading') applyGoogleButtonState();
 
     // ==========================================
     // EMAIL / PASSWORD LOGIN
@@ -748,9 +782,9 @@
 
     // ==========================================
     // GOOGLE SIGN-IN
-    // Note: Google Sign-In via popup works on desktop browsers.
-    // On Android WebView, it may require additional native handling.
-    // If AndroidBridge.openGoogleSignIn is available, that is called instead.
+    // Google OAuth requires a hosted (https:// or localhost) origin.
+    // file:// URLs are blocked by Google. On Android, the native bridge
+    // must implement openGoogleSignIn() to handle this natively.
     // ==========================================
     function doGoogleSignIn() {
         // Determine which panel is active for showing errors
@@ -760,9 +794,15 @@
         const spinnerId = activePanel === 'login' ? 'spinner-google-login' : 'spinner-google-reg';
         const labelId = activePanel === 'login' ? 'label-google-login' : 'label-google-reg';
 
-        // If Android native bridge handles Google Sign-In
-        if (window.AndroidBridge && AndroidBridge.openGoogleSignIn) {
+        // Route to native Android Google Sign-In if available
+        if (window.AndroidBridge && typeof AndroidBridge.openGoogleSignIn === 'function') {
             AndroidBridge.openGoogleSignIn();
+            return;
+        }
+
+        // Block early if on file:// — Google OAuth will always fail here
+        if (isFileProtocol) {
+            showMsg(msgId, 'Google Sign-In is not available in this environment. Please use Email/Password instead.', 'error');
             return;
         }
 
