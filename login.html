@@ -468,18 +468,19 @@
             <span id="label-login"><i class="fas fa-sign-in-alt"></i> &nbsp;Sign In</span>
         </button>
 
-        <div class="divider">or</div>
-
-        <button class="btn-google" id="btn-google-login" onclick="doGoogleSignIn()">
-            <svg class="google-icon" viewBox="0 0 48 48">
-                <path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34.1 6.6 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.9z"/>
-                <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16.1 19 13 24 13c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34.1 6.6 29.3 4 24 4 16.3 4 9.7 8.4 6.3 14.7z"/>
-                <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.3 35.3 26.8 36 24 36c-5.2 0-9.6-3.3-11.3-8H6.3C9.6 35.5 16.3 44 24 44z"/>
-                <path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.3-2.3 4.2-4.2 5.6l6.2 5.2C40.3 36.5 44 30.8 44 24c0-1.3-.1-2.7-.4-3.9z"/>
-            </svg>
-            <span id="label-google-login">Continue with Google</span>
-            <span class="spinner" id="spinner-google-login"></span>
-        </button>
+        <div class="google-section" id="google-section-login">
+            <div class="divider">or</div>
+            <button class="btn-google" id="btn-google-login" onclick="doGoogleSignIn()">
+                <svg class="google-icon" viewBox="0 0 48 48">
+                    <path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34.1 6.6 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.9z"/>
+                    <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16.1 19 13 24 13c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34.1 6.6 29.3 4 24 4 16.3 4 9.7 8.4 6.3 14.7z"/>
+                    <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.3 35.3 26.8 36 24 36c-5.2 0-9.6-3.3-11.3-8H6.3C9.6 35.5 16.3 44 24 44z"/>
+                    <path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.3-2.3 4.2-4.2 5.6l6.2 5.2C40.3 36.5 44 30.8 44 24c0-1.3-.1-2.7-.4-3.9z"/>
+                </svg>
+                <span id="label-google-login">Continue with Google</span>
+                <span class="spinner" id="spinner-google-login"></span>
+            </button>
+        </div>
 
         <div class="message" id="msg-login"></div>
     </div>
@@ -521,18 +522,19 @@
             <span id="label-register"><i class="fas fa-user-plus"></i> &nbsp;Create Account</span>
         </button>
 
-        <div class="divider">or</div>
-
-        <button class="btn-google" id="btn-google-reg" onclick="doGoogleSignIn()">
-            <svg class="google-icon" viewBox="0 0 48 48">
-                <path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34.1 6.6 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.9z"/>
-                <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16.1 19 13 24 13c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34.1 6.6 29.3 4 24 4 16.3 4 9.7 8.4 6.3 14.7z"/>
-                <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.3 35.3 26.8 36 24 36c-5.2 0-9.6-3.3-11.3-8H6.3C9.6 35.5 16.3 44 24 44z"/>
-                <path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.3-2.3 4.2-4.2 5.6l6.2 5.2C40.3 36.5 44 30.8 44 24c0-1.3-.1-2.7-.4-3.9z"/>
-            </svg>
-            <span id="label-google-reg">Continue with Google</span>
-            <span class="spinner" id="spinner-google-reg"></span>
-        </button>
+        <div class="google-section" id="google-section-reg">
+            <div class="divider">or</div>
+            <button class="btn-google" id="btn-google-reg" onclick="doGoogleSignIn()">
+                <svg class="google-icon" viewBox="0 0 48 48">
+                    <path fill="#FFC107" d="M43.6 20.1H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34.1 6.6 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.9z"/>
+                    <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 16.1 19 13 24 13c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34.1 6.6 29.3 4 24 4 16.3 4 9.7 8.4 6.3 14.7z"/>
+                    <path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.3 35.3 26.8 36 24 36c-5.2 0-9.6-3.3-11.3-8H6.3C9.6 35.5 16.3 44 24 44z"/>
+                    <path fill="#1976D2" d="M43.6 20.1H42V20H24v8h11.3c-.8 2.3-2.3 4.2-4.2 5.6l6.2 5.2C40.3 36.5 44 30.8 44 24c0-1.3-.1-2.7-.4-3.9z"/>
+                </svg>
+                <span id="label-google-reg">Continue with Google</span>
+                <span class="spinner" id="spinner-google-reg"></span>
+            </button>
+        </div>
 
         <div class="message" id="msg-register"></div>
     </div>
@@ -695,24 +697,20 @@
     // ==========================================
     // DETECT ENVIRONMENT (file:// blocks Google OAuth)
     // ==========================================
+    // Google Sign-In via popup only works on https:// or localhost.
+    // On Android WebView (file:// protocol), it must go through the native bridge.
+    // If neither condition is met, hide the Google button entirely.
     const isFileProtocol = window.location.protocol === 'file:';
-    const hasAndroidGoogleBridge = window.AndroidBridge && typeof AndroidBridge.openGoogleSignIn === 'function';
-    const googleAvailable = !isFileProtocol || hasAndroidGoogleBridge;
+    const isAndroid = !!window.AndroidBridge;
+    const hasNativeGoogle = isAndroid && typeof AndroidBridge.openGoogleSignIn === 'function';
+    const googleAvailable = !isFileProtocol || hasNativeGoogle;
 
     function applyGoogleButtonState() {
-        ['btn-google-login', 'btn-google-reg'].forEach(id => {
-            const btn = document.getElementById(id);
-            if (!btn) return;
-            if (!googleAvailable) {
-                btn.disabled = true;
-                btn.style.opacity = '0.45';
-                btn.style.cursor = 'not-allowed';
-                btn.title = 'Google Sign-In is not available when opening the app as a local file. Use Email/Password instead.';
-                // Replace label text
-                const labelId = id === 'btn-google-login' ? 'label-google-login' : 'label-google-reg';
-                const label = document.getElementById(labelId);
-                if (label) label.innerHTML = 'Google Sign-In unavailable here';
-            }
+        ['google-section-login', 'google-section-reg'].forEach(id => {
+            const section = document.getElementById(id);
+            if (!section) return;
+            // Completely hide the Google section (button + divider) if unavailable
+            section.style.display = googleAvailable ? 'block' : 'none';
         });
     }
 
